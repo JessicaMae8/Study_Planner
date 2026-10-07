@@ -435,3 +435,7 @@ Merge commit:
 ```text
 f0733a7
 ```
+
+## Laboratory 3 Verification
+
+Verification instruction: Test administrator access and administrator-only status updates.
