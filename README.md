@@ -369,7 +369,7 @@ The following Laboratory 3 security tests were performed:
 | T06 Invalid input is rejected | Passed |
 | T07 Spoofed ownership/status/role fields are rejected | Passed |
 | T08 HTML output is escaped | Passed |
-| T09 Missing CSRF token is rejected | Passed |
+| T09 CSRF token protection is enforced | Passed |
 | T10 Invalid administrator status value is rejected | Passed |
 
 The denied-write tests were also checked against the database to confirm that unauthorized or invalid requests did not create or modify records.
