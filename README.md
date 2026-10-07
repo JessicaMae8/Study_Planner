@@ -416,8 +416,17 @@ Secure request ownership and status access
 The changes were pushed to GitHub and reviewed through Pull Request #1.
 
 Pull Request:
+
 https://github.com/JessicaMae8/Study_Planner/pull/1
+
 The pull request was reviewed and approved by `roreryen`.
+
+Branch protection was not configured for this repository. Peer approval through Pull Request #1 was used as the review control before merging into `main`.
+
+GitHub Issue:
+
+Issue #2 — Secure request ownership and status access:
+https://github.com/JessicaMae8/Study_Planner/issues/2
 
 The pull request was merged successfully into `main`.
 
@@ -425,3 +434,4 @@ Merge commit:
 
 ```text
 f0733a7
+```
