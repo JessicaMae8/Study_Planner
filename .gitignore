@@ -1,3 +1,5 @@
+# Local Docker environment secrets
+.env.container
 *.log
 .DS_Store
 .env
