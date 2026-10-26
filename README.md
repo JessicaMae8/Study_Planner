@@ -439,3 +439,148 @@ f0733a7
 ## Laboratory 3 Verification
 
 Verification instruction: Test administrator access and administrator-only status updates.
+
+
+---
+
+# Laboratory 4 - Containers and Reproducible Environments
+
+## Overview
+
+Laboratory 4 introduces a Docker-based environment for the existing Study Planner Laravel application. The environment separates the web server, Laravel application, and MySQL database into individual services.
+
+Docker Compose manages the services, their network, startup dependencies, and persistent database storage. The original XAMPP database, `study_planner_db`, remains separate from the Docker database, `laravel_request_container_db`.
+
+## Technologies Used
+
+- Laravel 12
+- PHP 8.3
+- MySQL 8.4
+- Nginx
+- Docker
+- Docker Compose
+- Composer
+- Node.js
+- npm
+
+## Docker Architecture
+
+The environment contains three main services:
+
+| Service | Technology | Responsibility |
+|---|---|---|
+| `web` | Nginx | Receives browser requests and serves the Laravel public directory |
+| `app` | PHP-FPM | Runs the Laravel application |
+| `db` | MySQL 8.4 | Stores users, service requests, and other application records |
+
+The browser accesses the application at `http://127.0.0.1:8080`. Nginx forwards PHP requests to the `app` service over the internal Docker network. The Laravel application connects to MySQL using the hostname `db` and port `3306`.
+
+## Docker Configuration Files
+
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Defines the multi-stage image build for dependencies, frontend assets, the Laravel application, and Nginx |
+| `compose.yaml` | Defines the application, web server, database, network, persistent volume, and health check |
+| `.dockerignore` | Excludes unnecessary files and sensitive local configuration from the Docker build context |
+| `.env.container.example` | Provides an example of the environment variables required by the container environment |
+| `docker/nginx/default.conf` | Configures Nginx to serve the Laravel application and forward PHP requests to PHP-FPM |
+
+The actual `.env.container` file contains local configuration and secrets. It is excluded from Git and must not be uploaded to the repository.
+
+## Environment Configuration
+
+The Docker environment uses a separate database named `laravel_request_container_db`. The application connects to the database through the internal Docker network using `DB_HOST=db` and `DB_PORT=3306`.
+
+The database uses a dedicated application account. Database credentials and the Laravel application key must be configured locally and must not be committed to GitHub or included in public documentation.
+
+## Build and Start the Environment
+
+Use the following commands from the project directory:
+
+```bash
+docker compose --env-file .env.container config --quiet
+docker compose --env-file .env.container up -d --build
+docker compose --env-file .env.container ps
+```
+
+The configuration check validates the Compose configuration. The second command builds the required images and starts the services. The final command displays the service status and published ports.
+
+## Database Migrations
+
+Run the Laravel migrations inside the application container:
+
+```bash
+docker compose --env-file .env.container exec app php artisan migrate
+docker compose --env-file .env.container exec app php artisan migrate:status
+```
+
+The migrations create the required tables in the Docker database. The original XAMPP database is separate and should not be reset as part of this exercise.
+
+## Application Verification
+
+The application was accessed through `http://127.0.0.1:8080`. The redesigned login page was displayed, and a test student account successfully accessed the service request page.
+
+A fictional request was created to test database persistence:
+
+| Test Item | Recorded Value |
+|---|---|
+| Request reference | `CONTAINER-PERSIST-01` |
+| Request owner | Test Student |
+| Quantity | 1 |
+| Status | pending |
+| Purpose | Docker persistence testing |
+
+The request remained available after the application container was recreated. It also remained available after the Docker Compose services were stopped and started again.
+
+## Persistence
+
+The Compose configuration defines a named volume, `db_data`, for MySQL data storage. This volume allows database records to remain available when containers are replaced or the services are restarted.
+
+The persistence checks used the following commands:
+
+```bash
+docker compose --env-file .env.container up -d
+docker compose --env-file .env.container ps
+```
+
+The test request was checked again after restarting the services. The database volume must not be removed during normal restart and persistence testing.
+
+## Security Verification
+
+The following checks were performed:
+
+- The application container runs as the non-root `www-data` user.
+- The MySQL service is accessible to other services on the internal Docker network and is not published directly to the host.
+- The web service is bound to `127.0.0.1:8080`.
+- The actual `.env.container` file is excluded from Git.
+- The Nginx image receives the Laravel public directory rather than the entire application source.
+- The Docker database uses a separate database name and dedicated application account.
+
+The following command verifies the application container's runtime user:
+
+```bash
+docker compose --env-file .env.container exec app id
+```
+
+The following command checks whether the local environment file is ignored by Git:
+
+```bash
+git check-ignore -v .env.container
+```
+
+## GitHub Review and Collaboration
+
+The Docker environment was developed on the feature branch `feature/lab4-containers` and submitted through Pull Request #3.
+
+- Repository: https://github.com/JessicaMae8/Study_Planner
+- Pull Request: https://github.com/JessicaMae8/Study_Planner/pull/3
+- Feature commit: `74a7636`
+- Merge commit: `47a2bd9`
+
+The pull request was approved by the reviewer and merged into `main`.
+
+## Verification Summary
+
+The Docker Compose environment was built and started successfully. The web, application, and database services ran as separate containers, and the MySQL service reported a healthy status. The Laravel migrations were applied to the Docker database, login and request creation were tested, and the test request remained available after application container recreation and a full service restart.
+
+The environment also uses a named database volume, an internal service network, local-only web port publishing, and a Git-ignored local environment file.
